@@ -1,0 +1,240 @@
+# Sample Manager API Documentation
+
+## General Information
+
+Base URL: `http://localhost:3000/api/v1`
+Content-Type: `application/json`
+Authentication: Bearer token
+
+## Endpoints
+
+### File Management
+
+#### Upload Files
+```
+POST /files/upload
+Content-Type: multipart/form-data
+
+Parameters:
+- files: Array<File> (required)
+- analyze: boolean (default: true)
+- organize: boolean (default: true)
+
+Response:
+{
+  "success": boolean,
+  "filesProcessed": number,
+  "results": Array<{
+    "id": string,
+    "name": string,
+    "analysis": object
+  }>
+}
+```
+
+#### Analyze Sample
+```
+POST /files/analyze
+Content-Type: multipart/form-data
+
+Parameters:
+- file: File (required)
+
+Response:
+{
+  "id": string,
+  "bpm": number,
+  "key": string,
+  "duration": number,
+  "category": string,
+  "tags": Array<string>
+}
+```
+
+### FL Studio Integration
+
+#### Connect
+```
+POST /fl-studio/connect
+
+Response:
+{
+  "success": boolean,
+  "status": string,
+  "version": string
+}
+```
+
+#### Load Sample
+```
+POST /fl-studio/load
+Content-Type: application/json
+
+Body:
+{
+  "sampleId": string,
+  "channel": number (optional),
+  "autoStretch": boolean (optional)
+}
+
+Response:
+{
+  "success": boolean,
+  "channelId": number
+}
+```
+
+#### Sync Project
+```
+GET /fl-studio/sync
+
+Response:
+{
+  "bpm": number,
+  "key": string,
+  "timeSignature": string,
+  "isPlaying": boolean
+}
+```
+
+### Library Management
+
+#### Search Samples
+```
+GET /library/search
+
+Parameters:
+- query: string
+- category: string (optional)
+- bpm: number (optional)
+- key: string (optional)
+- tags: Array<string> (optional)
+- page: number (default: 1)
+- limit: number (default: 50)
+
+Response:
+{
+  "total": number,
+  "page": number,
+  "results": Array<Sample>
+}
+```
+
+#### Update Sample
+```
+PATCH /library/samples/:id
+Content-Type: application/json
+
+Body:
+{
+  "name": string (optional),
+  "category": string (optional),
+  "tags": Array<string> (optional),
+  "favorite": boolean (optional)
+}
+
+Response:
+{
+  "success": boolean,
+  "sample": Sample
+}
+```
+
+## Models
+
+### Sample Object
+```typescript
+interface Sample {
+  id: string;
+  name: string;
+  path: string;
+  category: string;
+  bpm: number;
+  key: string;
+  duration: number;
+  waveform: Array<number>;
+  tags: Array<string>;
+  favorite: boolean;
+  dateAdded: string;
+  lastUsed: string;
+  analysis: {
+    loudness: number;
+    pitch: number;
+    clarity: number;
+    // ...more analysis data
+  };
+}
+```
+
+## Error Handling
+
+Errors are returned in the following format:
+```json
+{
+  "error": {
+    "code": string,
+    "message": string,
+    "details": object (optional)
+  }
+}
+```
+
+Common error codes:
+- `FILE_TOO_LARGE`: File exceeds size limit
+- `INVALID_FORMAT`: Unsupported file format
+- `FL_STUDIO_NOT_FOUND`: FL Studio connection failed
+- `ANALYSIS_FAILED`: Sample analysis failed
+- `NOT_FOUND`: Resource not found
+- `INVALID_REQUEST`: Invalid request parameters
+
+## Rate Limiting
+
+- 100 requests per minute per IP
+- 1000 requests per hour per API key
+- Rate limit headers included in response:
+  - `X-RateLimit-Limit`
+  - `X-RateLimit-Remaining`
+  - `X-RateLimit-Reset`
+
+## Webhooks
+
+Register webhook URLs to receive notifications for:
+- File processing completion
+- FL Studio connection status
+- Library updates
+- Analysis results
+
+## Examples
+
+### Upload and Analyze
+```javascript
+const formData = new FormData();
+formData.append('file', file);
+
+const response = await fetch('/api/v1/files/upload', {
+  method: 'POST',
+  body: formData
+});
+
+const result = await response.json();
+```
+
+### Search by BPM Range
+```javascript
+const response = await fetch('/api/v1/library/search?bpm=120-130&category=drums');
+const results = await response.json();
+```
+
+### Load to FL Studio
+```javascript
+await fetch('/api/v1/fl-studio/load', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    sampleId: '123',
+    autoStretch: true
+  })
+});
+```

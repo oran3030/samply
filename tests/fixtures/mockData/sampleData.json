@@ -1,0 +1,16 @@
+{
+  "samples": [
+    {
+      "id": 1,
+      "name": "kick.wav",
+      "category": "drums",
+      "bpm": 128
+    },
+    {
+      "id": 2,
+      "name": "synth.wav",
+      "category": "synth",
+      "bpm": 140
+    }
+  ]
+}
