@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 node_modules/
 dist/
 *.log
 .DS_Store
 .env
 coverage/
+=======
+node_modules
+>>>>>>> af58241847d4fb9af5895c4b4b511eee00556996
