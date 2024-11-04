@@ -1,0 +1,15 @@
+name: CI/CD Pipeline
+
+# מתי להפעיל את התהליך
+on:
+  push:               # כל שינוי בפרויקט
+    branches: [main]  # עבור branch בשם "main"
+  pull_request:       # כל pull request חדש
+
+# הגדרת כל שלב בתהליך
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # של
